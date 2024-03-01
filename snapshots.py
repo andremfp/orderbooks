@@ -1,9 +1,9 @@
 import time
 import requests
-import websocket
+import socket
 import json
 
-def fetch_orderbook_snapshot(symbol, limit=100):
+def getSnapshot(symbol, limit=100):
     # Define Binance API URL for order book endpoint
     url = f'https://api.binance.com/api/v3/depth?symbol={symbol}&limit={limit}'
     

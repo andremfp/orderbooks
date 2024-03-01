@@ -1,24 +1,19 @@
-import snapshots, database
+import snapshots, database, ws
 import sqlite3
-import time
-import threading
+import asyncio
+
+exchange = 'Binance'
+symbol = 'BTCUSDT'
 
 # Example usage:
 if __name__ == "__main__":
-    exchange = 'Binance'
-    symbol = 'BTCUSDT'
     
-    # Connect to SQLite database
-    conn = sqlite3.connect('orderbook.db')
-    cursor = conn.cursor()
-
-    database.createTables(conn)
+    database.initDatabase()
     
-    snapshot = snapshots.fetch_orderbook_snapshot(symbol)
+    snapshot = snapshots.getSnapshot(symbol)
     print("Order Book Snapshot:")
     print(snapshot)
 
-    database.store(cursor, snapshot, exchange, symbol)
+    database.store(snapshot, exchange, symbol)
 
-    conn.commit()
-    conn.close()
+    #ws.listenWebsocket(symbol.lower())

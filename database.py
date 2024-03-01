@@ -1,65 +1,70 @@
+import time
 import sqlite3
-from datetime import datetime
 
-def createTables(cursor):
+db = 'orderbook.db'
 
-    # Create tables if not exists
+def initDatabase():
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+
+    # Table for bids
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS OrderBookData (
+        CREATE TABLE IF NOT EXISTS Bids (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestampIndex INTEGER,
-            lastUpdatedIdIndex INTEGER,
+            timestamp FLOAT,
             exchange TEXT,
-            currencyPair TEXT,
+            symbol TEXT,
             price REAL,
-            quantity REAL,
-            type TEXT,
-            FOREIGN KEY (timestampIndex) REFERENCES Timestamps(id)
-            FOREIGN KEY (lastUpdatedIdIndex) REFERENCES LastUpdateIds(id)
+            quantity REAL
         )
     ''')
 
+    # Table for asks
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Timestamps (
+        CREATE TABLE IF NOT EXISTS Asks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp DATETIME UNIQUE
+            timestamp FLOAT,
+            exchange TEXT,
+            symbol TEXT,
+            price REAL,
+            quantity REAL
         )
     ''')
 
+    # Table for last update
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS LastUpdateIds (
+        CREATE TABLE IF NOT EXISTS LastUpdate (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             lastUpdateId INTEGER
         )
     ''')
 
-def store(cursor, data, exchange, symbol):
-    
-    timestamp = datetime.now()
-    cursor.execute('''
-            INSERT INTO Timestamps (timestamp)
-            VALUES (?)
-        ''', (timestamp,))
-    
-    timestampIndex = cursor.lastrowid
+def store(data, exchange, symbol):
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
 
-    timestamp = datetime.now()
+    timestamp = time.time()
+
+    # Clear if existing and insert data into tables
+    cursor.execute('DELETE FROM LastUpdate')
     cursor.execute('''
-            INSERT INTO LastUpdateIds (lastUpdateId)
+            INSERT INTO LastUpdate (lastUpdateId)
             VALUES (?)
         ''', (data['lastUpdateId'],))
-    
-    lastUpdatedIdIndex = cursor.lastrowid
 
-    # Insert data into tables
+    cursor.execute('DELETE FROM Bids')
     for bid in data['bids']:
         cursor.execute('''
-            INSERT INTO OrderBookData (timestampIndex, lastUpdatedIdIndex, exchange, currencyPair, price, quantity, type)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (timestampIndex, lastUpdatedIdIndex, exchange, symbol, float(bid[0]), float(bid[1]), 'bid'))
+            INSERT INTO Bids (timestamp, exchange, symbol, price, quantity)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (timestamp, exchange, symbol, float(bid[0]), float(bid[1])))
 
+    cursor.execute('DELETE FROM Asks')
     for ask in data['asks']:
         cursor.execute('''
-            INSERT INTO OrderBookData (timestampIndex, lastUpdatedIdIndex, exchange, currencyPair, price, quantity, type)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (timestampIndex, lastUpdatedIdIndex, exchange, symbol, float(ask[0]), float(ask[1]), 'ask'))
+            INSERT INTO Asks (timestamp, exchange, symbol, price, quantity)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (timestamp, exchange, symbol, float(ask[0]), float(ask[1])))
+
+    conn.commit()
+    conn.close()
