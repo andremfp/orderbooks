@@ -1,4 +1,4 @@
-import snapshots, database, ws, stats
+import snapshots, database, ws, stats, resample
 import sqlite3
 import asyncio
 
@@ -16,8 +16,8 @@ if __name__ == "__main__":
 
     stats.computeAndStoreStats(exchange, symbol)
     
-    """ print("BINS OF SIZE 100")
-    resampledData = stats.resample_data(100)
-    print(resampledData) """
+    print("BINS OF SIZE 100")
+    resampledData = resample.resample_data(100)
+    print(resampledData)
 
     #ws.listenWebsocket(symbol.lower())
