@@ -1,6 +1,7 @@
-import time
+import json
 import sqlite3
 import pandas as pd
+import ast
 
 db = 'orderbook.db'
 
@@ -11,13 +12,12 @@ def initDatabase():
     # Table for orderbook
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS orderbook (
-            id INTEGER PRIMARY KEY,
             timestamp DATETIME,
             exchange TEXT,
             symbol TEXT,
-            type TEXT,
-            price REAL,
-            quantity REAL
+            bids TEXT,
+            asks TEXT,
+            PRIMARY KEY (exchange, symbol)
         )
     ''')
 
@@ -37,19 +37,10 @@ def storeOrderbook(data, exchange, symbol, timestamp):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
-    cursor.execute('DELETE FROM orderbook')
-
-    for bid in data['bids']:
-        cursor.execute('''
-            INSERT INTO orderbook (timestamp, exchange, symbol, type, price, quantity)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (timestamp, exchange, symbol, 'bid',float(bid[0]), float(bid[1])))
-
-    for ask in data['asks']:
-        cursor.execute('''
-            INSERT INTO orderbook (timestamp, exchange, symbol, type, price, quantity)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (timestamp, exchange, symbol, 'ask', float(ask[0]), float(ask[1])))
+    cursor.execute('''
+        INSERT OR REPLACE INTO orderbook (timestamp, exchange, symbol, bids, asks)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (timestamp, exchange, symbol, json.dumps(data['bids']), json.dumps(data['asks'])))
 
     conn.commit()
     conn.close()
@@ -66,15 +57,21 @@ def storeStats(data, exchange, symbol, timestamp):
     conn.commit()
     conn.close()
 
-def getQuantities():
+def getQuantities(exchange, symbol):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
-    cursor.execute(f'SELECT quantity FROM orderbook WHERE type="bid"')
-    bidQuantities = [row[0] for row in cursor.fetchall()]
+    # Get bids and extract quantities as list
+    cursor.execute(f'SELECT bids FROM orderbook WHERE exchange="{exchange}" AND symbol="{symbol}"')
+    bids = ast.literal_eval(cursor.fetchall()[0][0])
 
-    cursor.execute(f'SELECT quantity FROM orderbook WHERE type="ask"')
-    askQuantities = [row[0] for row in cursor.fetchall()]
+    bidQuantities = [float(bid[1]) for bid in bids]
+
+    # Get asks and extract quantities as list
+    cursor.execute(f'SELECT asks FROM orderbook WHERE exchange="{exchange}" AND symbol="{symbol}"')
+    asks = ast.literal_eval(cursor.fetchall()[0][0])
+
+    askQuantities = [float(ask[1]) for ask in asks]
 
     conn.close()
     return bidQuantities, askQuantities

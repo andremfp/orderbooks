@@ -2,7 +2,7 @@ import database
 import datetime
 
 def computeAndStoreStats(exchange, symbol):
-    quantities = database.getQuantities()
+    quantities = database.getQuantities(exchange, symbol)
     totalVolumes = tuple(sum(lst) for lst in quantities)
     print("TOTAL BID,ASK VOLUME")
     print(totalVolumes)
