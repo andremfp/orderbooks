@@ -10,81 +10,56 @@ def initDatabase():
 
     # Table for bids
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS bids (
+        CREATE TABLE IF NOT EXISTS orderbook (
             id INTEGER PRIMARY KEY,
-            timestamp FLOAT,
+            timestamp DATETIME,
             exchange TEXT,
             symbol TEXT,
+            type TEXT,
             price REAL,
             quantity REAL
         )
     ''')
 
-    # Table for asks
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS asks (
-            id INTEGER PRIMARY KEY,
-            timestamp FLOAT,
-            exchange TEXT,
-            symbol TEXT,
-            price REAL,
-            quantity REAL
-        )
-    ''')
-
-    # Table for last update
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS lastUpdate (
-            id INTEGER PRIMARY KEY,
-            lastUpdateId INTEGER
-        )
-    ''')
-
-def store(data, exchange, symbol):
+def store(data, exchange, symbol, timestamp):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
-    timestamp = time.time()
+    cursor.execute('DELETE FROM orderbook')
 
-    # Clear if existing and insert data into tables
-    cursor.execute('DELETE FROM lastUpdate')
-    cursor.execute('''
-            INSERT INTO LastUpdate (lastUpdateId)
-            VALUES (?)
-        ''', (data['lastUpdateId'],))
-
-    cursor.execute('DELETE FROM bids')
     for bid in data['bids']:
         cursor.execute('''
-            INSERT INTO Bids (timestamp, exchange, symbol, price, quantity)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (timestamp, exchange, symbol, float(bid[0]), float(bid[1])))
+            INSERT INTO orderbook (timestamp, exchange, symbol, type, price, quantity)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (timestamp, exchange, symbol, 'bid',float(bid[0]), float(bid[1])))
 
-    cursor.execute('DELETE FROM asks')
     for ask in data['asks']:
         cursor.execute('''
-            INSERT INTO Asks (timestamp, exchange, symbol, price, quantity)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (timestamp, exchange, symbol, float(ask[0]), float(ask[1])))
+            INSERT INTO orderbook (timestamp, exchange, symbol, type, price, quantity)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (timestamp, exchange, symbol, 'ask', float(ask[0]), float(ask[1])))
 
     conn.commit()
     conn.close()
 
-def getQuantities(type):
+def getQuantities():
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
-    cursor.execute(f'SELECT quantity FROM {type}')
-    quantities = [row[0] for row in cursor.fetchall()]
+    cursor.execute(f'SELECT quantity FROM orderbook WHERE type="bid"')
+    bidQuantities = [row[0] for row in cursor.fetchall()]
+
+    cursor.execute(f'SELECT quantity FROM orderbook WHERE type="ask"')
+    askQuantities = [row[0] for row in cursor.fetchall()]
 
     conn.close()
-    return quantities
+    return bidQuantities, askQuantities
 
 # Function to fetch data from SQLite database
-def getDataToResample(type):
+def getDataToResample():
     conn = sqlite3.connect(db)
     
-    data = pd.read_sql_query(f'SELECT price, quantity FROM {type} ORDER BY price', conn)
+    data = pd.read_sql_query(f'SELECT price, quantity, type FROM orderbook ORDER BY price', conn)
     
     conn.close()
     return data

@@ -10,18 +10,15 @@ if __name__ == "__main__":
     
     database.initDatabase()
     
-    snapshot = snapshots.getSnapshot(symbol, 1000)
-    #print("Order Book Snapshot:")
-    #print(snapshot)
+    snapshot, timestamp, lastUpdateId = snapshots.getSnapshot(symbol, 1000)
 
-    database.store(snapshot, exchange, symbol)
+    database.store(snapshot, exchange, symbol, timestamp)
 
-    print('ASKS TO RESAMPLE')
-    asks = database.getDataToResample('asks')
-    print(asks)
-
+    print("TOTAL BID,ASK VOLUME")
+    print(stats.totalVolume())
+    
     print("BINS OF SIZE 100")
-    resampled_asks = stats.resample_data(asks, 100)
-    print(resampled_asks)
+    resampledData = stats.resample_data(100)
+    print(resampledData)
 
     #ws.listenWebsocket(symbol.lower())
