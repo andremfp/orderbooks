@@ -1,9 +1,9 @@
 import database
 import pandas as pd
 
-def resample_data(binSize):
+def resample_data(exchange, symbol, binSize):
 
-    data = database.getDataToResample()
+    bids, asks = database.getBidsAsksLists(exchange, symbol)
 
     # Define price bins using the min and max prices from the data
     bins = range(int(data['price'].iloc[0]), int(data['price'].iloc[-1]) + binSize, binSize)

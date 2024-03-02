@@ -10,12 +10,12 @@ if __name__ == "__main__":
     
     database.initDatabase()
     
-    snapshot, timestamp, lastUpdateId = snapshots.getSnapshot(symbol, 100)
+    snapshot, timestamp, lastUpdateId = snapshots.getSnapshot(symbol, 5)
 
     database.storeOrderbook(snapshot, exchange, symbol, timestamp)
 
     stats.computeAndStoreStats(exchange, symbol)
-    
+    #database.getDataToResample(exchange, symbol)
     """
     print("BINS OF SIZE 100")
     resampledData = resample.resample_data(100)
