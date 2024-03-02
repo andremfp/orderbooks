@@ -8,7 +8,7 @@ def initDatabase():
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
-    # Table for bids
+    # Table for orderbook
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS orderbook (
             id INTEGER PRIMARY KEY,
@@ -21,7 +21,19 @@ def initDatabase():
         )
     ''')
 
-def store(data, exchange, symbol, timestamp):
+    # Table for stats
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS stats (
+            id INTEGER PRIMARY KEY,
+            timestamp DATETIME,
+            exchange TEXT,
+            symbol TEXT,
+            totalBidVolume FLOAT,
+            totalAskVolume FLOAT
+        )
+    ''')
+
+def storeOrderbook(data, exchange, symbol, timestamp):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
@@ -38,6 +50,18 @@ def store(data, exchange, symbol, timestamp):
             INSERT INTO orderbook (timestamp, exchange, symbol, type, price, quantity)
             VALUES (?, ?, ?, ?, ?, ?)
         ''', (timestamp, exchange, symbol, 'ask', float(ask[0]), float(ask[1])))
+
+    conn.commit()
+    conn.close()
+
+def storeStats(data, exchange, symbol, timestamp):
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        INSERT INTO stats (timestamp, exchange, symbol, totalBidVolume, totalAskVolume)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (timestamp, exchange, symbol,float(data[0]), float(data[1])))
 
     conn.commit()
     conn.close()

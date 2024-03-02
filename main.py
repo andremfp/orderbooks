@@ -12,13 +12,12 @@ if __name__ == "__main__":
     
     snapshot, timestamp, lastUpdateId = snapshots.getSnapshot(symbol, 1000)
 
-    database.store(snapshot, exchange, symbol, timestamp)
+    database.storeOrderbook(snapshot, exchange, symbol, timestamp)
 
-    print("TOTAL BID,ASK VOLUME")
-    print(stats.totalVolume())
+    stats.computeAndStoreStats(exchange, symbol)
     
-    print("BINS OF SIZE 100")
+    """ print("BINS OF SIZE 100")
     resampledData = stats.resample_data(100)
-    print(resampledData)
+    print(resampledData) """
 
     #ws.listenWebsocket(symbol.lower())
