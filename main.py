@@ -10,11 +10,9 @@ if __name__ == "__main__":
     
     database.initDatabase()
     
-    snapshot, timestamp, lastUpdateId = snapshots.getSnapshot(symbol, 50)
+    snapshot, timestamp, lastUpdateId = snapshots.getSnapshot(symbol, 100)
 
     database.storeOrderbook(snapshot, exchange, symbol, timestamp)
-
-    database.getQuantities(exchange, symbol)
 
     stats.computeAndStoreStats(exchange, symbol)
     

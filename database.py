@@ -62,17 +62,14 @@ def getQuantities(exchange, symbol):
     cursor = conn.cursor()
 
     # Get bids and extract quantities as list
-    cursor.execute(f'SELECT bids FROM orderbook WHERE exchange="{exchange}" AND symbol="{symbol}"')
-    bids = ast.literal_eval(cursor.fetchall()[0][0])
-
+    cursor.execute(f'SELECT bids, asks FROM orderbook WHERE exchange="{exchange}" AND symbol="{symbol}"')
+    data = cursor.fetchall()[0]
+    bids = ast.literal_eval(data[0])
+    asks = ast.literal_eval(data[1])
+    
     bidQuantities = [float(bid[1]) for bid in bids]
-
-    # Get asks and extract quantities as list
-    cursor.execute(f'SELECT asks FROM orderbook WHERE exchange="{exchange}" AND symbol="{symbol}"')
-    asks = ast.literal_eval(cursor.fetchall()[0][0])
-
     askQuantities = [float(ask[1]) for ask in asks]
-
+    
     conn.close()
     return bidQuantities, askQuantities
 
