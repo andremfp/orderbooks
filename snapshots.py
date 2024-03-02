@@ -3,7 +3,7 @@ import requests
 import socket
 import json
 
-def getSnapshot(symbol, limit=100):
+def getSnapshot(symbol, limit):
     # Define Binance API URL for order book endpoint
     url = f'https://api.binance.com/api/v3/depth?symbol={symbol}&limit={limit}'
     
