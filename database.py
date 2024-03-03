@@ -1,6 +1,5 @@
 import json
 import sqlite3
-import pandas as pd
 import ast
 
 db = 'orderbook.db'
@@ -9,7 +8,7 @@ def initDatabase():
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
-    # Table for orderbook
+    # Table for orderbooks
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS orderbook (
             timestamp DATETIME,
@@ -33,14 +32,29 @@ def initDatabase():
         )
     ''')
 
+    # Table for resampled orderbooks
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS resampledOrderbooks (
+            timestamp DATETIME,
+            exchange TEXT,
+            symbol TEXT,
+            binnedOrderbook TEXT,
+            PRIMARY KEY (exchange, symbol)
+        )
+    ''')
+
 def storeOrderbook(data, exchange, symbol, timestamp):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
+    # Convert bids and asks to float
+    bids = [[float(elem) for elem in bid] for bid in data['bids']]
+    asks = [[float(elem) for elem in ask] for ask in data['asks']]
+
     cursor.execute('''
         INSERT OR REPLACE INTO orderbook (timestamp, exchange, symbol, bids, asks)
         VALUES (?, ?, ?, ?, ?)
-    ''', (timestamp, exchange, symbol, json.dumps(data['bids']), json.dumps(data['asks'])))
+    ''', (timestamp, exchange, symbol, json.dumps(bids), json.dumps(asks)))
 
     conn.commit()
     conn.close()
@@ -57,6 +71,18 @@ def storeStats(totalBidVolume, totalAskVolume, exchange, symbol, timestamp):
     conn.commit()
     conn.close()
 
+def storeResampledOrderbook(data, exchange, symbol, timestamp):
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        INSERT OR REPLACE INTO resampledOrderbooks (timestamp, exchange, symbol, binnedOrderbook)
+        VALUES (?, ?, ?, ?)
+    ''', (timestamp, exchange, symbol, json.dumps(data)))
+
+    conn.commit()
+    conn.close()
+
 def getBidsAsksLists(exchange, symbol):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
@@ -65,6 +91,9 @@ def getBidsAsksLists(exchange, symbol):
     data = cursor.fetchall()[0]
     bids = ast.literal_eval(data[0])
     asks = ast.literal_eval(data[1])
+
+    bids = [[float(elem) for elem in bid] for bid in bids]
+    asks = [[float(elem) for elem in ask] for ask in asks]
 
     conn.close()
     return bids, asks

@@ -2,7 +2,7 @@ import snapshots, database, ws, stats, resample
 import sqlite3
 import asyncio
 
-exchange = 'Binance'
+exchange = 'Coinbase'
 symbol = 'BTCUSDT'
 
 # Example usage:
@@ -10,15 +10,11 @@ if __name__ == "__main__":
     
     database.initDatabase()
     
-    snapshot, timestamp, lastUpdateId = snapshots.getSnapshot(symbol, 5)
+    snapshot, timestamp, lastUpdateId = snapshots.getSnapshot(symbol, 20)
 
     database.storeOrderbook(snapshot, exchange, symbol, timestamp)
 
     stats.computeAndStoreStats(exchange, symbol)
-    #database.getDataToResample(exchange, symbol)
-    """
-    print("BINS OF SIZE 100")
-    resampledData = resample.resample_data(100)
-    print(resampledData) """
+    resample.resampleAndStore(exchange, symbol, 2)
 
     #ws.listenWebsocket(symbol.lower())
