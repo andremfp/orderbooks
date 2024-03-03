@@ -1,6 +1,5 @@
 import database
 import json
-import sqlite3
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
@@ -85,7 +84,7 @@ def getStatsHistory():
 
     allStatsJson = {
     "exchange": allStats[0][1],
-    "symbol": allStats[0][2],
+    "currencyPair": allStats[0][2],
     "statistics": [{
         "timestamp": stats[0],
         "totalBidVolume": stats[3],

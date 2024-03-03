@@ -1,7 +1,5 @@
-import time, datetime
+import datetime
 import requests
-import socket
-import json
 
 def getSnapshot(symbol, limit):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")

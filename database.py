@@ -51,10 +51,9 @@ def storeOrderbook(data, exchange, symbol, timestamp):
     bids = [[float(elem) for elem in bid] for bid in data['bids']]
     asks = [[float(elem) for elem in ask] for ask in data['asks']]
 
-    cursor.execute('''
-        INSERT OR REPLACE INTO orderbooks (timestamp, exchange, symbol, bids, asks)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (timestamp, exchange, symbol, json.dumps(bids), json.dumps(asks)))
+    cursor.execute('''INSERT OR REPLACE INTO orderbooks
+                    (timestamp, exchange, symbol, bids, asks)
+                    VALUES (?, ?, ?, ?, ?)''', (timestamp, exchange, symbol, json.dumps(bids), json.dumps(asks)))
 
     conn.commit()
     conn.close()
@@ -63,10 +62,9 @@ def storeStats(totalBidVolume, totalAskVolume, exchange, symbol, timestamp):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
-    cursor.execute('''
-        INSERT INTO stats (timestamp, exchange, symbol, totalBidVolume, totalAskVolume)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (timestamp, exchange, symbol, totalBidVolume, totalAskVolume))
+    cursor.execute('''INSERT INTO stats
+                    (timestamp, exchange, symbol, totalBidVolume, totalAskVolume)
+                    VALUES (?, ?, ?, ?, ?)''', (timestamp, exchange, symbol, totalBidVolume, totalAskVolume))
 
     conn.commit()
     conn.close()
@@ -75,10 +73,9 @@ def storeResampledOrderbook(data, exchange, symbol, timestamp):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
-    cursor.execute('''
-        INSERT OR REPLACE INTO resampledOrderbooks (timestamp, exchange, symbol, binnedOrderbook)
-        VALUES (?, ?, ?, ?)
-    ''', (timestamp, exchange, symbol, json.dumps(data)))
+    cursor.execute('''INSERT OR REPLACE INTO resampledOrderbooks 
+                    (timestamp, exchange, symbol, binnedOrderbook)
+                    VALUES (?, ?, ?, ?)''', (timestamp, exchange, symbol, json.dumps(data)))
 
     conn.commit()
     conn.close()
@@ -87,7 +84,10 @@ def getBidsAsksLists(exchange, symbol):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
-    cursor.execute(f'SELECT bids, asks FROM orderbooks WHERE exchange="{exchange}" AND symbol="{symbol}"')
+    cursor.execute('''SELECT bids, asks
+                    FROM orderbooks
+                    WHERE exchange = ? AND symbol = ?''', (exchange, symbol))
+
     data = cursor.fetchall()[0]
     bids = ast.literal_eval(data[0])
     asks = ast.literal_eval(data[1])
@@ -122,16 +122,15 @@ def getStats(exchange, symbol):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
-    cursor.execute('''
-    SELECT timestamp, exchange, symbol, totalBidVolume, totalAskVolume
-    FROM stats
-    WHERE exchange = ? AND symbol = ?
-    AND timestamp = (
-        SELECT MIN(timestamp)
-        FROM stats
-        WHERE exchange = ? AND symbol = ?
-    )
-    ''', (exchange, symbol, exchange, symbol))
+    cursor.execute('''SELECT timestamp, exchange, symbol, totalBidVolume, totalAskVolume
+                    FROM stats
+                    WHERE exchange = ? AND symbol = ?
+                    AND timestamp = (
+                        SELECT MIN(timestamp)
+                        FROM stats
+                        WHERE exchange = ? AND symbol = ?
+                    )
+                    ''', (exchange, symbol, exchange, symbol))
 
     return cursor.fetchone()
 
@@ -139,11 +138,10 @@ def getAllStats(exchange, symbol):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
-    cursor.execute('''
-    SELECT timestamp, exchange, symbol, totalBidVolume, totalAskVolume
-    FROM stats
-    WHERE exchange = ? AND symbol = ?
-    ORDER BY timestamp
-    ''', (exchange, symbol))
+    cursor.execute('''SELECT timestamp, exchange, symbol, totalBidVolume, totalAskVolume
+                    FROM stats
+                    WHERE exchange = ? AND symbol = ?
+                    ORDER BY timestamp
+                    ''', (exchange, symbol))
 
     return cursor.fetchall()
