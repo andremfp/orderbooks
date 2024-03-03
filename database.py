@@ -97,3 +97,13 @@ def getBidsAsksLists(exchange, symbol):
 
     conn.close()
     return bids, asks
+
+def getOrderbook(exchange, symbol):
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+
+    cursor.execute('''SELECT timestamp, exchange, symbol, bids, asks
+                    FROM orderbooks
+                    WHERE exchange = ? AND symbol = ?''', (exchange, symbol))
+
+    return cursor.fetchone()

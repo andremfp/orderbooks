@@ -1,6 +1,5 @@
 import snapshots, database, ws, stats, resample
-import sqlite3
-import asyncio
+from api import app
 
 exchange = 'Binance'
 symbol = 'BTCUSDT'
@@ -16,5 +15,7 @@ if __name__ == "__main__":
 
     stats.computeAndStoreStats(exchange, symbol)
     resample.resampleAndStore(exchange, symbol, 2)
+
+    app.run(debug=True)
 
     #ws.listenWebsocket(symbol.lower())
