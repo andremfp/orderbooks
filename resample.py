@@ -2,6 +2,7 @@ import database
 import pandas as pd
 import datetime
 
+# Resample an orderbok into bins of size binSize and store it to the db
 def resampleAndStore(exchange, symbol, binSize):
     bids, asks = database.getBidsAsksLists(exchange, symbol)
 
@@ -20,6 +21,7 @@ def resampleAndStore(exchange, symbol, binSize):
     resampledOrderbook = buildResampledOrderBook(resampledData)
     database.storeResampledOrderbook(resampledOrderbook, exchange, symbol, timestamp=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
+# Build a DataFrame with bids and asks
 def buildDataFrame(bids, asks):
     bidsDf = pd.DataFrame(bids, columns=['price', 'quantity'])
     bidsDf['type'] = 'bid'  # Add a column indicating it's a bid
@@ -32,6 +34,7 @@ def buildDataFrame(bids, asks):
 
     return data
 
+# Build the resampled orderbook output
 def buildResampledOrderBook(resampledData):
     resampledOrderbook = []
 

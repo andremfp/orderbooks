@@ -7,15 +7,19 @@ symbol = 'BTCUSDT'
 # Example usage:
 if __name__ == "__main__":
 
+    # Create db and tables if they don't exist
     database.initDatabase()
     
-    snapshot, timestamp, lastUpdateId = snapshots.getSnapshot(symbol, 20)
+    # Fetch orderbook snapshot and store it
+    lastUpdateId = snapshots.getAndStoreSnapshot(exchange, symbol, 20)
 
-    database.storeOrderbook(snapshot, exchange, symbol, timestamp)
-
+    # Compute statistics and store them
     stats.computeAndStoreStats(exchange, symbol)
+    
+    # Resample the latest orderbook and store it
     resample.resampleAndStore(exchange, symbol, 2)
 
+    # Init API server
     app.run()
 
     #ws.listenWebsocket(symbol.lower())

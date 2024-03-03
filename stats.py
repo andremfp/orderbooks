@@ -1,6 +1,7 @@
 import database
 import datetime
 
+# Compute statistics for a given orderbook and store them in the db
 def computeAndStoreStats(exchange, symbol):
     bids, asks = database.getBidsAsksLists(exchange, symbol)
     

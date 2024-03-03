@@ -9,6 +9,7 @@ def getLatestOrderbook():
     exchange = request.args.get('exchange')
     symbol = request.args.get('symbol')
 
+    # Fetch the latest orderbook from the db
     orderbook = database.getOrderbook(exchange, symbol)
 
     if orderbook == None:
@@ -18,6 +19,7 @@ def getLatestOrderbook():
     bids = json.loads(bids)
     asks = json.loads(asks)
 
+    # Build response payload
     orderbookJson = {
         "exchange": exchange,
         "currencyPair": symbol,
@@ -33,6 +35,7 @@ def getLatestResampledOrderbook():
     exchange = request.args.get('exchange')
     symbol = request.args.get('symbol')
 
+    # Fetch the latest resampled orderbook from the db
     resampledOrderbook = database.getResampledOrderbook(exchange, symbol)
 
     if resampledOrderbook == None:
@@ -41,6 +44,7 @@ def getLatestResampledOrderbook():
     timestamp, exchange, symbol, bins = resampledOrderbook
     bins = json.loads(bins)
 
+    # Build response payload
     orderbookJson = {
         "exchange": exchange,
         "currencyPair": symbol,
@@ -55,6 +59,7 @@ def getLatestStats():
     exchange = request.args.get('exchange')
     symbol = request.args.get('symbol')
 
+    # Fetch the latest stats from the db
     stats = database.getStats(exchange, symbol)
 
     if stats == None:
@@ -62,6 +67,7 @@ def getLatestStats():
 
     timestamp, exchange, symbol, totalBidVolume, totalAskVolume = stats
 
+    # Build response payload
     statsJson = {
         "exchange": exchange,
         "currencyPair": symbol,
@@ -77,11 +83,13 @@ def getStatsHistory():
     exchange = request.args.get('exchange')
     symbol = request.args.get('symbol')
 
+    # Fetch the all stats from the db
     allStats = database.getAllStats(exchange, symbol)
 
     if allStats == None:
         return jsonify({"error": "No data found for the specified exchange and symbol."}), 404
 
+    # Build response payload
     allStatsJson = {
     "exchange": allStats[0][1],
     "currencyPair": allStats[0][2],

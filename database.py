@@ -4,6 +4,7 @@ import ast
 
 db = 'orderbooks.db'
 
+# Create db and tables if they don't exist
 def initDatabase():
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
@@ -43,6 +44,7 @@ def initDatabase():
         )
     ''')
 
+# Store an orderbook snapshot to the db
 def storeOrderbook(data, exchange, symbol, timestamp):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
@@ -58,6 +60,7 @@ def storeOrderbook(data, exchange, symbol, timestamp):
     conn.commit()
     conn.close()
 
+# Store stats to the db
 def storeStats(totalBidVolume, totalAskVolume, exchange, symbol, timestamp):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
@@ -69,6 +72,7 @@ def storeStats(totalBidVolume, totalAskVolume, exchange, symbol, timestamp):
     conn.commit()
     conn.close()
 
+# Store a resampled orderbook to the db
 def storeResampledOrderbook(data, exchange, symbol, timestamp):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
@@ -80,6 +84,7 @@ def storeResampledOrderbook(data, exchange, symbol, timestamp):
     conn.commit()
     conn.close()
 
+# Fetch bids and asks from an orderbook. Return them as lists
 def getBidsAsksLists(exchange, symbol):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
@@ -98,6 +103,7 @@ def getBidsAsksLists(exchange, symbol):
     conn.close()
     return bids, asks
 
+# Fetch an orderbook from the db
 def getOrderbook(exchange, symbol):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
@@ -108,6 +114,7 @@ def getOrderbook(exchange, symbol):
 
     return cursor.fetchone()
 
+# Fetch a resampled orderbook from the db
 def getResampledOrderbook(exchange, symbol):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
@@ -118,6 +125,7 @@ def getResampledOrderbook(exchange, symbol):
 
     return cursor.fetchone()
 
+# Fetch the latest computed stats from the db
 def getStats(exchange, symbol):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
@@ -134,6 +142,7 @@ def getStats(exchange, symbol):
 
     return cursor.fetchone()
 
+# Fetch all computed stats along the time for a given orderbook from the db
 def getAllStats(exchange, symbol):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
