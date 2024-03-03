@@ -1,5 +1,6 @@
 import database
 import json
+import sqlite3
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
@@ -62,7 +63,7 @@ def getLatestStats():
 
     timestamp, exchange, symbol, totalBidVolume, totalAskVolume = stats
 
-    orderbookJson = {
+    statsJson = {
         "exchange": exchange,
         "currencyPair": symbol,
         "timestamp": timestamp,
@@ -70,9 +71,26 @@ def getLatestStats():
         "totalAskVolume": totalAskVolume
     }
 
-    return jsonify(orderbookJson)
+    return jsonify(statsJson)
 
 @app.route('/api/statistics/history', methods=['GET'])
-def get_statistics_history():
-    return 'stat history'
-    #return jsonify({"message": "History endpoint not implemented yet"})
+def getStatsHistory():
+    exchange = request.args.get('exchange')
+    symbol = request.args.get('symbol')
+
+    allStats = database.getAllStats(exchange, symbol)
+
+    if allStats == None:
+        return jsonify({"error": "No data found for the specified exchange and symbol."}), 404
+
+    allStatsJson = {
+    "exchange": allStats[0][1],
+    "symbol": allStats[0][2],
+    "statistics": [{
+        "timestamp": stats[0],
+        "totalBidVolume": stats[3],
+        "totalAskVolume": stats[4]
+    } for stats in allStats]
+    }
+
+    return jsonify(allStatsJson)

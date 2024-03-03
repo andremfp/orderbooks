@@ -134,3 +134,16 @@ def getStats(exchange, symbol):
     ''', (exchange, symbol, exchange, symbol))
 
     return cursor.fetchone()
+
+def getAllStats(exchange, symbol):
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    SELECT timestamp, exchange, symbol, totalBidVolume, totalAskVolume
+    FROM stats
+    WHERE exchange = ? AND symbol = ?
+    ORDER BY timestamp
+    ''', (exchange, symbol))
+
+    return cursor.fetchall()
