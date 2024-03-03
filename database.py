@@ -2,7 +2,7 @@ import json
 import sqlite3
 import ast
 
-db = 'orderbook.db'
+db = 'orderbooks.db'
 
 def initDatabase():
     conn = sqlite3.connect(db)
@@ -10,7 +10,7 @@ def initDatabase():
 
     # Table for orderbooks
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS orderbook (
+        CREATE TABLE IF NOT EXISTS orderbooks (
             timestamp DATETIME,
             exchange TEXT,
             symbol TEXT,
@@ -52,7 +52,7 @@ def storeOrderbook(data, exchange, symbol, timestamp):
     asks = [[float(elem) for elem in ask] for ask in data['asks']]
 
     cursor.execute('''
-        INSERT OR REPLACE INTO orderbook (timestamp, exchange, symbol, bids, asks)
+        INSERT OR REPLACE INTO orderbooks (timestamp, exchange, symbol, bids, asks)
         VALUES (?, ?, ?, ?, ?)
     ''', (timestamp, exchange, symbol, json.dumps(bids), json.dumps(asks)))
 
@@ -87,7 +87,7 @@ def getBidsAsksLists(exchange, symbol):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
-    cursor.execute(f'SELECT bids, asks FROM orderbook WHERE exchange="{exchange}" AND symbol="{symbol}"')
+    cursor.execute(f'SELECT bids, asks FROM orderbooks WHERE exchange="{exchange}" AND symbol="{symbol}"')
     data = cursor.fetchall()[0]
     bids = ast.literal_eval(data[0])
     asks = ast.literal_eval(data[1])
