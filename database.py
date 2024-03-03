@@ -117,3 +117,20 @@ def getResampledOrderbook(exchange, symbol):
                     WHERE exchange = ? AND symbol = ?''', (exchange, symbol))
 
     return cursor.fetchone()
+
+def getStats(exchange, symbol):
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    SELECT timestamp, exchange, symbol, totalBidVolume, totalAskVolume
+    FROM stats
+    WHERE exchange = ? AND symbol = ?
+    AND timestamp = (
+        SELECT MIN(timestamp)
+        FROM stats
+        WHERE exchange = ? AND symbol = ?
+    )
+    ''', (exchange, symbol, exchange, symbol))
+
+    return cursor.fetchone()

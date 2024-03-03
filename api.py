@@ -5,7 +5,7 @@ from flask import Flask, jsonify, request
 app = Flask(__name__)
 
 @app.route('/api/orderbook/latest', methods=['GET'])
-def get_orderbook_latest():
+def getLatestOrderbook():
     exchange = request.args.get('exchange')
     symbol = request.args.get('symbol')
 
@@ -29,7 +29,7 @@ def get_orderbook_latest():
     return jsonify(orderbookJson)
 
 @app.route('/api/orderbook/resampled', methods=['GET'])
-def get_orderbook_resampled():
+def getLatestResampledOrderbook():
     exchange = request.args.get('exchange')
     symbol = request.args.get('symbol')
 
@@ -51,9 +51,26 @@ def get_orderbook_resampled():
     return jsonify(orderbookJson)
 
 @app.route('/api/statistics/latest', methods=['GET'])
-def get_statistics_latest():
-    return 'latest stats'
-    #return jsonify(statistics_latest)
+def getLatestStats():
+    exchange = request.args.get('exchange')
+    symbol = request.args.get('symbol')
+
+    stats = database.getStats(exchange, symbol)
+
+    if stats == None:
+        return jsonify({"error": "No data found for the specified exchange and symbol."}), 404
+
+    timestamp, exchange, symbol, totalBidVolume, totalAskVolume = stats
+
+    orderbookJson = {
+        "exchange": exchange,
+        "currencyPair": symbol,
+        "timestamp": timestamp,
+        "totalBidVolume": totalBidVolume,
+        "totalAskVolume": totalAskVolume
+    }
+
+    return jsonify(orderbookJson)
 
 @app.route('/api/statistics/history', methods=['GET'])
 def get_statistics_history():

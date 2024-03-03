@@ -6,7 +6,7 @@ symbol = 'BTCUSDT'
 
 # Example usage:
 if __name__ == "__main__":
-    
+
     database.initDatabase()
     
     snapshot, timestamp, lastUpdateId = snapshots.getSnapshot(symbol, 20)
@@ -16,6 +16,6 @@ if __name__ == "__main__":
     stats.computeAndStoreStats(exchange, symbol)
     resample.resampleAndStore(exchange, symbol, 2)
 
-    app.run(debug=True)
+    app.run()
 
     #ws.listenWebsocket(symbol.lower())
