@@ -2,7 +2,7 @@ import snapshots, database, ws, stats, resample
 import sqlite3
 import asyncio
 
-exchange = 'Coinbase'
+exchange = 'Binance'
 symbol = 'BTCUSDT'
 
 # Example usage:
