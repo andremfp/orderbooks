@@ -107,3 +107,13 @@ def getOrderbook(exchange, symbol):
                     WHERE exchange = ? AND symbol = ?''', (exchange, symbol))
 
     return cursor.fetchone()
+
+def getResampledOrderbook(exchange, symbol):
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+
+    cursor.execute('''SELECT timestamp, exchange, symbol, binnedOrderbook
+                    FROM resampledOrderbooks
+                    WHERE exchange = ? AND symbol = ?''', (exchange, symbol))
+
+    return cursor.fetchone()

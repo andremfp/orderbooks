@@ -41,11 +41,11 @@ def buildResampledOrderBook(resampledData):
 
         # Because pandas stores floats as float64, the resulting representation might differ in precision
         # Assuming that quantities don't have more than 10 decimal places
-        bin = {
-            "bin": bin_lower_bound,
-            "bidQuantity": round(row['bidQuantity'],10),
-            "askQuantity": round(row['askQuantity'],10)
-        }
+        bin = [
+            bin_lower_bound,
+            round(row['bidQuantity'],10),
+            round(row['askQuantity'],10)
+        ]
         
         resampledOrderbook.append(bin)
 
