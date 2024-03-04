@@ -11,7 +11,7 @@ if __name__ == "__main__":
     database.initDatabase()
     
     # Fetch orderbook snapshot and store it
-    lastUpdateId = snapshots.getAndStoreSnapshot(exchange, symbol, 20)
+    snapshots.getAndStoreSnapshot(exchange, symbol, 20)
 
     # Compute statistics and store them
     stats.computeAndStoreStats(exchange, symbol)
@@ -20,6 +20,6 @@ if __name__ == "__main__":
     resample.resampleAndStore(exchange, symbol, 2)
 
     # Init API server
-    app.run()
+    #app.run()
 
-    #ws.listenWebsocket(symbol.lower())
+    ws.listenWebsocket(exchange, symbol)

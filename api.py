@@ -15,7 +15,7 @@ def getLatestOrderbook():
     if orderbook == None:
         return jsonify({"error": "No data found for the specified exchange and symbol."}), 404
 
-    timestamp, exchange, symbol, bids, asks = orderbook
+    timestamp, exchange, symbol, _, bids, asks = orderbook
     bids = json.loads(bids)
     asks = json.loads(asks)
 

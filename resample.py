@@ -4,7 +4,7 @@ import datetime
 
 # Resample an orderbok into bins of size binSize and store it to the db
 def resampleAndStore(exchange, symbol, binSize):
-    bids, asks = database.getBidsAsksLists(exchange, symbol)
+    _, bids, asks = database.getBidsAsksLists(exchange, symbol)
 
     data = buildDataFrame(bids, asks)
 

@@ -15,6 +15,7 @@ def initDatabase():
             timestamp DATETIME,
             exchange TEXT,
             symbol TEXT,
+            lastUpdateId INTEGER,
             bids TEXT,
             asks TEXT,
             PRIMARY KEY (exchange, symbol)
@@ -54,8 +55,8 @@ def storeOrderbook(data, exchange, symbol, timestamp):
     asks = [[float(elem) for elem in ask] for ask in data['asks']]
 
     cursor.execute('''INSERT OR REPLACE INTO orderbooks
-                    (timestamp, exchange, symbol, bids, asks)
-                    VALUES (?, ?, ?, ?, ?)''', (timestamp, exchange, symbol, json.dumps(bids), json.dumps(asks)))
+                    (timestamp, exchange, symbol, lastUpdateId, bids, asks)
+                    VALUES (?, ?, ?, ?, ?, ?)''', (timestamp, exchange, symbol, data['lastUpdateId'], json.dumps(bids), json.dumps(asks)))
 
     conn.commit()
     conn.close()
@@ -89,26 +90,27 @@ def getBidsAsksLists(exchange, symbol):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
-    cursor.execute('''SELECT bids, asks
+    cursor.execute('''SELECT lastUpdateId, bids, asks
                     FROM orderbooks
                     WHERE exchange = ? AND symbol = ?''', (exchange, symbol))
 
     data = cursor.fetchall()[0]
-    bids = ast.literal_eval(data[0])
-    asks = ast.literal_eval(data[1])
+    lastUpdateId = data[0]
+    bids = ast.literal_eval(data[1])
+    asks = ast.literal_eval(data[2])
 
     bids = [[float(elem) for elem in bid] for bid in bids]
     asks = [[float(elem) for elem in ask] for ask in asks]
 
     conn.close()
-    return bids, asks
+    return lastUpdateId, bids, asks
 
 # Fetch an orderbook from the db
 def getOrderbook(exchange, symbol):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
-    cursor.execute('''SELECT timestamp, exchange, symbol, bids, asks
+    cursor.execute('''SELECT timestamp, exchange, symbol, lastUpdateId, bids, asks
                     FROM orderbooks
                     WHERE exchange = ? AND symbol = ?''', (exchange, symbol))
 
