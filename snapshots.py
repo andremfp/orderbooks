@@ -2,7 +2,6 @@ import database
 import datetime
 import requests
 import logging
-import ast
 
 def getAndStoreSnapshot(exchange, symbol, limit):
     logging.info('Getting snapshot...')
