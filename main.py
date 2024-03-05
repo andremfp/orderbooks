@@ -2,6 +2,7 @@ import snapshots, database, ws, stats, resample
 from api import app
 import asyncio
 import logging
+import threading
 
 exchange = 'Binance'
 symbol = 'BTCUSDT'
@@ -26,9 +27,9 @@ if __name__ == "__main__":
     # Resample the latest orderbook and store it
     resample.resampleAndStore(exchange, symbol, 2)
 
-    #ws.listenWebsocket(exchange, symbol)
-    asyncio.run(streamUpdates(exchange, symbol))
-
+    # Start WebSocket connection in a separate thread
+    ws_thread = threading.Thread(target=lambda: asyncio.run(streamUpdates(exchange, symbol)))
+    ws_thread.start()
 
     # Init API server
-    #app.run()
+    app.run()
