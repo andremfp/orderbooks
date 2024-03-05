@@ -4,7 +4,7 @@ import datetime
 import logging
 
 # Resample an orderbok into bins of size binSize and store it to the db
-def resampleAndStore(exchange, symbol, binSize):
+async def resampleAndStore(exchange, symbol, binSize):
     logging.info('Resampling orderbook...')
     _, bids, asks = database.getBidsAsksLists(exchange, symbol)
 

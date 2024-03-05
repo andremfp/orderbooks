@@ -19,17 +19,21 @@ async def statistics(exchange, symbol):
         # Sleep for 5 minutes
         time.sleep(5 * 60)
 
-# Example usage:
+async def resampleSnapshot(exchange, symbol):
+    while True:
+        # Resample into bins of 100
+        await resample.resampleAndStore(exchange, symbol, 100)
+        # Sleep for 10 minutes
+        time.sleep(10 * 60)
+    
+
 if __name__ == "__main__":
 
     # Create db and tables if they don't exist
     database.initDatabase()
     
-    # Fetch orderbook snapshot and store it
-    snapshots.getAndStoreSnapshot(exchange, symbol, 20)
-    
-    # Resample the latest orderbook and store it
-    resample.resampleAndStore(exchange, symbol, 2)
+    # Fetch initial orderbook snapshot and store it
+    snapshots.getAndStoreSnapshot(exchange, symbol, 1000)
 
     # Start webSocket thread
     wsThread = threading.Thread(target=lambda: asyncio.run(streamUpdates(exchange, symbol)))
@@ -38,6 +42,10 @@ if __name__ == "__main__":
     # Start statistics thread
     statisticsThread = threading.Thread(target=lambda: asyncio.run(statistics(exchange, symbol)))
     statisticsThread.start()
+
+    # Start resample thread
+    resampleThread = threading.Thread(target=lambda: asyncio.run(resampleSnapshot(exchange, symbol)))
+    resampleThread.start()
 
     # Init API server
     app.run()
