@@ -44,7 +44,7 @@ def processUpdates(updates, exchange, symbol):
     # If the snapshot is older than the update window, we need to re-sync and fetch a new snapshot
     else:
         logging.info('Out of sync, re-syncing...')
-        getAndStoreSnapshot(exchange, symbol, 20)
+        getAndStoreSnapshot(exchange, symbol, 1000)
 
 def updateSnapshot(updates, lastUpdateId, bids, asks, exchange, symbol):
     logging.info('Updating snapshot...')
