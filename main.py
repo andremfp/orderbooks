@@ -1,8 +1,15 @@
 import snapshots, database, ws, stats, resample
 from api import app
+import asyncio
+import logging
 
 exchange = 'Binance'
 symbol = 'BTCUSDT'
+
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+
+async def streamUpdates(exchange, symbol):
+    await ws.connectWebsocket(exchange, symbol)
 
 # Example usage:
 if __name__ == "__main__":
@@ -19,7 +26,9 @@ if __name__ == "__main__":
     # Resample the latest orderbook and store it
     resample.resampleAndStore(exchange, symbol, 2)
 
+    #ws.listenWebsocket(exchange, symbol)
+    asyncio.run(streamUpdates(exchange, symbol))
+
+
     # Init API server
     #app.run()
-
-    ws.listenWebsocket(exchange, symbol)

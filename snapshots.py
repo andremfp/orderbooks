@@ -5,6 +5,7 @@ import logging
 import ast
 
 def getAndStoreSnapshot(exchange, symbol, limit):
+    logging.info('Getting snapshot...')
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     # Define Binance API URL for order book endpoint
     url = f'https://api.binance.com/api/v3/depth?symbol={symbol}&limit={limit}'
@@ -26,6 +27,7 @@ def getAndStoreSnapshot(exchange, symbol, limit):
         logging.fatal(f"An error occurred: {str(e)}")
 
 def processUpdates(updates, exchange, symbol):
+    logging.info('Processing updates...')
     lastUpdateId, bids, asks = database.getBidsAsksLists(exchange, symbol)
 
     # Sort bids and asks by price
@@ -35,24 +37,27 @@ def processUpdates(updates, exchange, symbol):
     # Not sure if this can happen
     # If snapshot is more recent than the last update, it's of no use
     if updates['u'] <= lastUpdateId:
+        logging.info('Stale update. Dropping it...')
         return  
     # If update window contains the snapshot's last update, update local snapshot
     if updates['U'] <= lastUpdateId + 1 <= updates['u']:
-        logging.info('Updating snapshot')
-        updateSnapshot(updates, lastUpdateId, bids, asks)
+        updateSnapshot(updates, lastUpdateId, bids, asks, exchange, symbol)
     # If the snapshot is older than the update window, we need to re-sync and fetch a new snapshot
     else:
         logging.info('Out of sync, re-syncing...')
         getAndStoreSnapshot(exchange, symbol, 20)
 
-def updateSnapshot(updates, lastUpdateId, bids, asks):
+def updateSnapshot(updates, lastUpdateId, bids, asks, exchange, symbol):
+    logging.info('Updating snapshot...')
     bidUpdates = updates['b']
     askUpdates = updates['a']
 
     bids = updateOrders(bidUpdates, bids)
-    asks = updateOrders(askUpdates, asks)    
-    
-    ### TODO - Store update
+    asks = updateOrders(askUpdates, asks)   
+
+    # Store updated snapshot
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    database.storeUpdatedOrderbook(lastUpdateId, bids, asks, timestamp, exchange, symbol)
 
 def updateOrders(updates, orders):
     lowestOrderPrice = orders[0][0]

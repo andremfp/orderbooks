@@ -1,11 +1,13 @@
 import json
 import sqlite3
 import ast
+import logging
 
 db = 'orderbooks.db'
 
 # Create db and tables if they don't exist
 def initDatabase():
+    logging.info('Initializing database...')
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
@@ -44,9 +46,11 @@ def initDatabase():
             PRIMARY KEY (exchange, symbol)
         )
     ''')
+    logging.info('Database initialized...')
 
 # Store an orderbook snapshot to the db
 def storeOrderbook(data, exchange, symbol, timestamp):
+    logging.info('Storing snapshot...')
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
@@ -60,9 +64,11 @@ def storeOrderbook(data, exchange, symbol, timestamp):
 
     conn.commit()
     conn.close()
+    logging.info('Snapshot stored...')
 
 # Store stats to the db
 def storeStats(totalBidVolume, totalAskVolume, exchange, symbol, timestamp):
+    logging.info('Storing stats...')
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
@@ -72,9 +78,11 @@ def storeStats(totalBidVolume, totalAskVolume, exchange, symbol, timestamp):
 
     conn.commit()
     conn.close()
+    logging.info('Stats stored...')
 
 # Store a resampled orderbook to the db
 def storeResampledOrderbook(data, exchange, symbol, timestamp):
+    logging.info('Storing resampled orderbook...')
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
 
@@ -84,6 +92,20 @@ def storeResampledOrderbook(data, exchange, symbol, timestamp):
 
     conn.commit()
     conn.close()
+    logging.info('Resampled orderbook stored...')
+
+def storeUpdatedOrderbook(lastUpdateId, bids, asks, timestamp, exchange, symbol):
+    logging.info('Storing updates...')
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+
+    cursor.execute('''UPDATE orderbooks
+                    SET timestamp = ?, lastUpdateId = ?, bids = ?, asks = ?
+                    WHERE exchange = ? AND symbol = ?''', (timestamp, lastUpdateId, json.dumps(bids), json.dumps(asks), exchange, symbol))
+
+    conn.commit()
+    conn.close()
+    logging.info('Updates stored...')
 
 # Fetch bids and asks from an orderbook. Return them as lists
 def getBidsAsksLists(exchange, symbol):

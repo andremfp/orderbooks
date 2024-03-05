@@ -1,8 +1,10 @@
 import database
 import datetime
+import logging
 
 # Compute statistics for a given orderbook and store them in the db
 def computeAndStoreStats(exchange, symbol):
+    logging.info('Computing stats...')
     _, bids, asks = database.getBidsAsksLists(exchange, symbol)
     
     bidQuantities = [float(bid[1]) for bid in bids]
