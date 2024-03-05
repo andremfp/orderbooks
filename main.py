@@ -3,6 +3,7 @@ from api import app
 import asyncio
 import logging
 import threading
+import time
 
 exchange = 'Binance'
 symbol = 'BTCUSDT'
@@ -12,6 +13,12 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=lo
 async def streamUpdates(exchange, symbol):
     await ws.connectWebsocket(exchange, symbol)
 
+async def statistics(exchange, symbol):
+    while True:
+        await stats.computeAndStoreStats(exchange, symbol)
+        # Sleep for 5 minutes
+        time.sleep(5 * 60)
+
 # Example usage:
 if __name__ == "__main__":
 
@@ -20,16 +27,17 @@ if __name__ == "__main__":
     
     # Fetch orderbook snapshot and store it
     snapshots.getAndStoreSnapshot(exchange, symbol, 20)
-
-    # Compute statistics and store them
-    stats.computeAndStoreStats(exchange, symbol)
     
     # Resample the latest orderbook and store it
     resample.resampleAndStore(exchange, symbol, 2)
 
-    # Start WebSocket connection in a separate thread
-    ws_thread = threading.Thread(target=lambda: asyncio.run(streamUpdates(exchange, symbol)))
-    ws_thread.start()
+    # Start webSocket thread
+    wsThread = threading.Thread(target=lambda: asyncio.run(streamUpdates(exchange, symbol)))
+    wsThread.start()
+
+    # Start statistics thread
+    statisticsThread = threading.Thread(target=lambda: asyncio.run(statistics(exchange, symbol)))
+    statisticsThread.start()
 
     # Init API server
     app.run()
